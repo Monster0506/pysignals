@@ -36,3 +36,10 @@ count.value += 1
 ```bash
 python main.py
 ```
+
+## Development
+
+```bash
+uv sync --extra dev
+uv run pytest
+```

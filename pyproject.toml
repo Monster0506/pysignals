@@ -1,10 +1,13 @@
 [project]
 name = "signals"
 version = "0.1.0"
-description = "Add your description here"
+description = "Minimal reactive primitives: signal, computed, and effect"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
 
 
 [build-system]
