@@ -39,7 +39,7 @@ class computed[T]:
     def value(self) -> T:
         if stack and (ctx := stack[-1]):
             self.subs.add(ctx)
-            ctx.addSource(lambda: self.subs.remove(ctx))
+            ctx.addSource(lambda: self.subs.discard(ctx))
 
         if self.dirty:
             self.cachedValue = self._execute()

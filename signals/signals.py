@@ -14,7 +14,7 @@ class signal[T]:
     def value(self) -> T:
         if stack and (ctx := stack[-1]):
             self.subscribers.add(ctx.setDirty)
-            ctx.addSource(lambda: self.subscribers.remove(ctx.setDirty))
+            ctx.addSource(lambda: self.subscribers.discard(ctx.setDirty))
         return self._value
 
     @value.setter
