@@ -2,14 +2,19 @@ from typing import Callable
 
 from .shared import stack
 
+Notify = Callable[..., None]
+
 
 class signal[T]:
     def __init__(self, val: T):
-        self.subscribers: set[Callable[[T], None]] = set()
+        self.subscribers: set[Notify] = set()
         self._value: T = val
 
     @property
     def value(self) -> T:
+        if stack and (ctx := stack[-1]):
+            self.subscribers.add(ctx.setDirty)
+            ctx.addSource(lambda: self.subscribers.remove(ctx.setDirty))
         return self._value
 
     @value.setter
@@ -18,14 +23,5 @@ class signal[T]:
         for subscriber in list(self.subscribers):
             subscriber.__call__(self.value)
 
-    @value.getter
-    def value(self) -> T:
-        if len(stack) > 0 and (currentComputed := stack[-1]):
-            self.subscribers.add(currentComputed.setDirty)
-            currentComputed.addSource(
-                lambda: self.subscribers.remove(currentComputed.setDirty)
-            )
-        return self._value
-
-    def subscribe(self, fn: Callable[[T], None]):
+    def subscribe(self, fn: Callable[[T], None]) -> None:
         self.subscribers.add(fn)
