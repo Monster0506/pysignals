@@ -18,5 +18,7 @@ class effect:
             self._run()
 
         stack.append(ComputeContext(set_dirty, lambda x: self.sources.add(x)))
-        self.fn.__call__()
-        stack.pop()
+        try:
+            self.fn.__call__()
+        finally:
+            stack.pop()
