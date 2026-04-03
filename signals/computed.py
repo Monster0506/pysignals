@@ -5,13 +5,13 @@ from .shared import ComputeContext, stack
 
 class computed[T]:
     def __init__(self, fn: Callable[[], T]):
-        self.dirty: bool = True
-        self.cachedValue: T = fn.__call__()
         self.fn = fn
         self.subs: set[ComputeContext] = set()
         self.sources: set[Callable[[], None]] = set()
+        self.dirty = True
+        self.cachedValue = self._execute()
 
-    def _recompute(self):
+    def _execute(self) -> T:
         for source in self.sources:
             source.__call__()
         self.sources.clear()
@@ -24,22 +24,23 @@ class computed[T]:
                 sub.setDirty()
 
         stack.append(ComputeContext(set_dirty, lambda x: self.sources.add(x)))
+        try:
+            result = self.fn.__call__()
+        except BaseException:
+            self.dirty = True
+            raise
+        finally:
+            stack.pop()
 
-        self.cachedValue = self.fn.__call__()
-        dirty = False
-        stack.pop()
+        self.dirty = False
+        return result
 
     @property
     def value(self) -> T:
-        return self.cachedValue
-
-    @value.getter
-    def value(self) -> T:
-        if len(stack) > 0 and (currentComputed := stack[-1]):
-            currentComputed = stack[-1]
-            self.subs.add(currentComputed)
-            currentComputed.addSource(lambda: self.subs.remove(currentComputed))
+        if stack and (ctx := stack[-1]):
+            self.subs.add(ctx)
+            ctx.addSource(lambda: self.subs.remove(ctx))
 
         if self.dirty:
-            self._recompute()
+            self.cachedValue = self._execute()
         return self.cachedValue
