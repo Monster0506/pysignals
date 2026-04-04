@@ -6,6 +6,8 @@ Notify = Callable[..., None]
 
 
 class signal[T]:
+    __slots__ = ("subscribers", "_value")
+
     def __init__(self, val: T):
         self.subscribers: set[Notify] = set()
         self._value: T = val

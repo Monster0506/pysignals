@@ -4,6 +4,8 @@ from .shared import ComputeContext, stack
 
 
 class effect:
+    __slots__ = ("fn", "sources")
+
     def __init__(self, fn: Callable[[], None]):
         self.fn = fn
         self.sources: set[Callable[[], None]] = set()

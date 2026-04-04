@@ -4,6 +4,8 @@ from .shared import ComputeContext, stack
 
 
 class computed[T]:
+    __slots__ = ("fn", "subs", "sources", "dirty", "cachedValue")
+
     def __init__(self, fn: Callable[[], T]):
         self.fn = fn
         self.subs: set[ComputeContext] = set()
